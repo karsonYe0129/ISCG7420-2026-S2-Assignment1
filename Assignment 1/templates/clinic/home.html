@@ -16,6 +16,21 @@
                 <li>Book an appointment</li>
                 <li>Manage your upcoming appointments</li>
             </ul>
+
+            <h2>Our doctors</h2>
+            {% for doctor in doctors %}
+                <article>
+                    <h3>{{ doctor.name }}</h3>
+                    <p>Specialty: {{ doctor.speciality }}</p>
+
+                    {% if doctor.bio %}
+                        <p>{{ doctor.bio }}</p>
+                    {% endif %}
+                </article>
+            {% empty %}
+                <p>No doctors are available at the moment.</p>
+            {% endfor %}
+
         </main>
     </body>
 </html>
