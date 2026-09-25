@@ -1,5 +1,6 @@
 from django.db import models
-
+from django.conf import settings
+from django.db import models
 # Create your models here.
 
 class Doctor(models.Model):
@@ -41,3 +42,41 @@ class Appointment(models.Model):
         return (
             f"{self.doctor.name} - {self.date} | "
             f"{self.start_time} - {self.end_time}")
+
+class Booking(models.Model):
+    patient = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name='bookings'
+    )
+    appointment = models.ForeignKey(
+        Appointment,
+        on_delete=models.PROTECT,
+        related_name='bookings'
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=[
+            ('confirmed', 'Confirmed'),
+            ('cancelled', 'Cancelled'),
+        ],
+        default='confirmed'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        constraints = [
+            models.UniqueConstraint(
+                fields=['appointment'],
+                condition=models.Q(status='confirmed'),
+                name='unique_confirmed_booking_per_slot',
+            ),
+        ]
+
+    def __str__(self):
+        return (
+            f"{self.patient.username} | "
+            f"{self.appointment} - {self.status}"
+        )
+

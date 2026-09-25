@@ -18,8 +18,8 @@ def home(request):
             doctor__is_active=True
         )
         .filter(
-            Q(date__gte=now.date())
-            | Q(date__isnull=True, start_time__gte=now.time())
+            Q(date__gt=now.date())
+            | Q(date=now.date(), start_time__gt=now.time())
         )
         .select_related('doctor')
     )
