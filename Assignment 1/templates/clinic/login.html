@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log in | Piki Ora Medical Center</title>
+</head>
+<body>
+<main>
+    <h1>Log in</h1>
+
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <input type="hidden" name="next" value="{{ next }}">
+        <button type="submit">Log in</button>
+    </form>
+
+    <p>
+        No account?
+        <a href="{% url 'register' %}">Register</a>
+    </p>
+
+    <p><a href="{% url 'home' %}">Back to home</a></p>
+
+</main>
+</body>
+</html>

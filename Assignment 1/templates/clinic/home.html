@@ -7,6 +7,21 @@
     </head>
     <body>
         <main>
+            {% if user.is_authenticated %}
+                <p>Signed in as {{ user.username }}</p>
+
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit">Log out</button>
+                </form>
+            {% else %}
+                <p>
+                    <a href="{% url 'login' %}">Log in</a>
+                    |
+                    <a href="{% url 'register' %}">Create an account</a>
+                </p>
+            {% endif %}
+
             <h1>{{ clinic_name }}</h1>
             <p>Book and manage your medical appointments online</p>
 
@@ -49,7 +64,6 @@
                     {% endfor %}
                 </ul>
             </section>
-
         </main>
     </body>
 </html>
