@@ -31,6 +31,25 @@
                 <p>No doctors are available at the moment.</p>
             {% endfor %}
 
+            <section>
+                <h2>Upcoming consultation slots</h2>
+                <p>All times are in Auckland local time</p>
+
+                <ul>
+                    {% for appointment in appointments %}
+                        <li>
+                            {{ appointment.doctor.name }} -
+                            {{ appointment.date|date:"Y-m-d" }},
+                            {{ appointment.start_time|time:"H:i" }}
+                            -
+                            {{ appointment.end_time|time:"H:i" }}
+                        </li>
+                    {% empty %}
+                        <li>No upcoming slots are available</li>
+                    {% endfor %}
+                </ul>
+            </section>
+
         </main>
     </body>
 </html>
