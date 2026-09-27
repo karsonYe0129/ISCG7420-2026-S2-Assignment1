@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.db import models
-# Create your models here.
+from django.utils import timezone
 
 class Doctor(models.Model):
     name = models.CharField(max_length=100)
@@ -80,3 +80,17 @@ class Booking(models.Model):
             f"{self.appointment} - {self.status}"
         )
 
+    @property
+    def can_cancel(self):
+        now = timezone.localtime()
+        appointment = self.appointment
+
+        has_started = (
+            appointment.date < now.date()
+            or (
+                appointment.date == now.date()
+                and appointment.start_time <= now.time()
+            )
+        )
+
+        return self.status == 'confirmed' and not has_started

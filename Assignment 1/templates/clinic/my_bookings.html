@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My booking | Piki Ora Medical Center</title>
+</head>
+<body>
+<main>
+    <h1>My bookings</h1>
+    <p>Signed in as {{ user.username }}</p>
+    <p>All times are in Auckland local time</p>
+
+    {% for message in messages %}
+    <p role="status">{{ message }}</p>
+    {% endfor %}
+
+    {% for booking in bookings %}
+    <article>
+        <h2>{{ booking.appointment.doctor.name }}</h2>
+
+        <p>
+            {{ booking.appointment.date|date:"Y-m-d" }}
+            {{ booking.appointment.start_time|time:"H:i" }}
+            -
+            {{ booking.appointment.end_time|time:"H:i" }}
+        </p>
+
+        <p>Status: {{ booking.get_status_display }}</p>
+
+        {% if booking.can_cancel %}
+        <p>
+            <a href="{% url 'reschedule_booking' booking.id %}">
+                Reschedule booking
+            </a>
+        </p>
+
+        <form
+                method="post"
+                action="{% url 'cancel_booking' booking.id %}"
+        >
+            {% csrf_token %}
+            <button type="submit">Cancel booking</button>
+        </form>
+        {% endif %}
+    </article>
+    {% empty %}
+    <p>You have no bookings yet.</p>
+    {% endfor %}
+
+    <p><a href="{% url 'home' %}">Back to home</a></p>
+</main>
+</body>
+</html>

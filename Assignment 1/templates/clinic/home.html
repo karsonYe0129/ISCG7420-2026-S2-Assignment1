@@ -1,69 +1,92 @@
 <!DoCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>{{ clinic_name }}</title>
-    </head>
-    <body>
-        <main>
-            {% if user.is_authenticated %}
-                <p>Signed in as {{ user.username }}</p>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ clinic_name }}</title>
+</head>
+<body>
+<main>
+    {% if user.is_authenticated %}
+    <p>Signed in as {{ user.username }}</p>
+    <p>
+        <a href="{% url 'my_bookings' %}">My bookings</a>
+    </p>
 
-                <form method="post" action="{% url 'logout' %}">
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Log out</button>
+    </form>
+    {% else %}
+    <p>
+        <a href="{% url 'login' %}">Log in</a>
+        |
+        <a href="{% url 'register' %}">Create an account</a>
+    </p>
+    {% endif %}
+
+    <h1>{{ clinic_name }}</h1>
+    <p>Book and manage your medical appointments online</p>
+
+    <h2>Our services</h2>
+    <ul>
+        <li>View doctors and available appointment slots</li>
+        <li>Book an appointment</li>
+        <li>Manage your upcoming appointments</li>
+    </ul>
+
+    <h2>Our doctors</h2>
+    {% for doctor in doctors %}
+    <article>
+        <h3>{{ doctor.name }}</h3>
+        <p>Specialty: {{ doctor.speciality }}</p>
+
+        {% if doctor.bio %}
+        <p>{{ doctor.bio }}</p>
+        {% endif %}
+    </article>
+    {% empty %}
+    <p>No doctors are available at the moment.</p>
+    {% endfor %}
+
+    <section>
+        <h2>Upcoming consultation slots</h2>
+        <p>All times are in Auckland local time</p>
+
+        <ul>
+            {% for appointment in appointments %}
+
+            <li>
+                {{ appointment.doctor.name }} -
+                {{ appointment.date|date:"Y-m-d" }},
+                {{ appointment.start_time|time:"H:i" }}
+                -
+                {{ appointment.end_time|time:"H:i" }}
+
+                {% if user.is_authenticated %}
+                <form
+                        method="post"
+                        action="{% url 'book_appointment' appointment.id %}"
+                >
                     {% csrf_token %}
-                    <button type="submit">Log out</button>
+                    <button type="submit">Book this slot</button>
                 </form>
-            {% else %}
-                <p>
-                    <a href="{% url 'login' %}">Log in</a>
-                    |
-                    <a href="{% url 'register' %}">Create an account</a>
-                </p>
-            {% endif %}
-
-            <h1>{{ clinic_name }}</h1>
-            <p>Book and manage your medical appointments online</p>
-
-            <h2>Our services</h2>
-            <ul>
-                <li>View doctors and available appointment slots</li>
-                <li>Book an appointment</li>
-                <li>Manage your upcoming appointments</li>
-            </ul>
-
-            <h2>Our doctors</h2>
-            {% for doctor in doctors %}
-                <article>
-                    <h3>{{ doctor.name }}</h3>
-                    <p>Specialty: {{ doctor.speciality }}</p>
-
-                    {% if doctor.bio %}
-                        <p>{{ doctor.bio }}</p>
-                    {% endif %}
-                </article>
+                {% else %}
+                <a href="{% url 'login' %}?next={% url 'home' %}">
+                    Log in to book
+                </a>
+                {% endif %}
+            </li>
             {% empty %}
-                <p>No doctors are available at the moment.</p>
+            <li>No upcoming slots are available</li>
             {% endfor %}
+        </ul>
+    </section>
 
-            <section>
-                <h2>Upcoming consultation slots</h2>
-                <p>All times are in Auckland local time</p>
+    {% for message in messages %}
+    <p role="status">{{ message }}</p>
+    {% endfor %}
 
-                <ul>
-                    {% for appointment in appointments %}
-                        <li>
-                            {{ appointment.doctor.name }} -
-                            {{ appointment.date|date:"Y-m-d" }},
-                            {{ appointment.start_time|time:"H:i" }}
-                            -
-                            {{ appointment.end_time|time:"H:i" }}
-                        </li>
-                    {% empty %}
-                        <li>No upcoming slots are available</li>
-                    {% endfor %}
-                </ul>
-            </section>
-        </main>
-    </body>
+</main>
+</body>
 </html>

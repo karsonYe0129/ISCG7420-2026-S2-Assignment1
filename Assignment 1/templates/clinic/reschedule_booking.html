@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta viewport="width=device-width, initial-scale=1.0">
+    <title>Reschedule Booking | Piki Ora Medical Center</title>
+</head>
+<body>
+<main>
+    <h1>Reschedule Booking</h1>
+
+    <p>Current Appointment: {{ booking.appointment }}</p>
+    <p>All times are in Auckland local time.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save new time</button>
+    </form>
+
+    <p>
+        <a href="{% url 'my_bookings' %}">Back to my bookings</a>
+    </p>
+
+</main>
+</body>
+</html>

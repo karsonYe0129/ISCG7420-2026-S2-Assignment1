@@ -18,6 +18,23 @@ urlpatterns = [
         auth_views.LogoutView.as_view(),
         name='logout',
     ),
+    path(
+        'appointments/<int:appointment_id>/book/',
+        views.book_appointment,
+        name='book_appointment',
+    ),
+    path('my_bookings/', views.my_bookings, name='my_bookings'),
 
+    path(
+        'bookings/<int:booking_id>/cancel/',
+        views.cancel_booking,
+        name='cancel_booking',
+    ),
+
+    path(
+        'bookings/<int:booking_id>/reschedule/',
+        views.reschedule_booking,
+        name='reschedule_booking',
+    ),
 
 ]
