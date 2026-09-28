@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 from django.test import TestCase
 from django.utils import timezone
-
+from django.urls import reverse
 from .models import Doctor, Appointment, Booking
 
 
@@ -67,3 +67,176 @@ class BookingTests(TestCase):
             Booking.objects.filter(status='confirmed').count(),
             1,
         )
+
+class AdminAccessTests(TestCase):
+    page_names = [
+        'dashboard',
+        'manage_doctors',
+        'doctor_create',
+        'manage_appointments',
+        'appointment_create',
+        'manage_bookings',
+        'manage_patients',
+    ]
+
+    @classmethod
+    def setUpTestData(cls):
+        User = get_user_model()
+        cls.patient = User.objects.create_user(
+            username='test_patient',
+        )
+        cls.staff = User.objects.create_user(
+            username='test_staff',
+            is_staff=True,
+        )
+
+    def test_anonymous_users_are_redirected_to_login(self):
+        for page_name in self.page_names:
+            with self.subTest(page=page_name):
+                url = reverse(page_name)
+                response = self.client.get(url)
+
+                self.assertRedirects(
+                    response,
+                    f"{reverse('login')}?next={url}",
+                    fetch_redirect_response=False,
+                )
+
+    def test_patients_cannot_access_admin_pages(self):
+        self.client.force_login(self.patient)
+
+        for page_name in self.page_names:
+            with self.subTest(page=page_name):
+                response = self.client.get(reverse(page_name))
+                self.assertEqual(response.status_code, 403)
+
+    def test_staff_can_access_admin_pages(self):
+        self.client.force_login(self.staff)
+
+        for page_name in self.page_names:
+            with self.subTest(page=page_name):
+                response = self.client.get(reverse(page_name))
+                self.assertEqual(response.status_code, 200)
+
+    def test_patient_cannot_deactivate_account(self):
+        self.client.force_login(self.patient)
+
+        response = self.client.post(
+            reverse('patient_set_status', args=[self.patient.pk]),
+            {'action': 'deactivate'},
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.patient.refresh_from_db()
+        self.assertTrue(self.patient.is_active)
+
+    def test_staff_can_deactivate_and_activate_patient(self):
+        self.client.force_login(self.staff)
+        url = reverse('patient_set_status', args=[self.patient.pk])
+
+        for action, expected_active in [
+            ('deactivate', False),
+            ('activate', True),
+        ]:
+            with self.subTest(action=action):
+                response = self.client.post(url, {'action': action})
+
+                self.assertRedirects(response, reverse('manage_patients'))
+                self.patient.refresh_from_db()
+                self.assertEqual(self.patient.is_active, expected_active)
+
+    def test_staff_cannot_deactivate_staff_account(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.post(
+            reverse('patient_set_status', args=[self.staff.pk]),
+            {'action': 'deactivate'},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.staff.refresh_from_db()
+        self.assertTrue(self.staff.is_active)
+
+    def test_account_status_cannot_be_changed_by_get(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(
+            reverse('patient_set_status', args=[self.patient.pk]),
+            {'action': 'deactivate'},
+        )
+
+        self.assertEqual(response.status_code, 405)
+        self.patient.refresh_from_db()
+        self.assertTrue(self.patient.is_active)
+
+class AdminCancelBookingTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        User = get_user_model()
+        cls.patient = User.objects.create_user(username='cancel_patient')
+        cls.staff = User.objects.create_user(
+            username='cancel_staff',
+            is_staff=True,
+        )
+
+        doctor = Doctor.objects.create(
+            name='Dr Cancellation Test',
+            speciality='General Practice',
+        )
+        cls.appointment = Appointment.objects.create(
+            doctor=doctor,
+            date=timezone.localdate() + timedelta(days=1),
+            start_time=time(9, 0),
+            end_time=time(9, 30),
+        )
+        cls.booking = Booking.objects.create(
+            patient=cls.patient,
+            appointment=cls.appointment,
+        )
+
+    def test_staff_can_cancel_upcoming_booking(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.post(
+            reverse('admin_cancel_booking', args=[self.booking.pk]),
+        )
+
+        self.assertRedirects(response, reverse('manage_bookings'))
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, 'cancelled')
+
+    def test_patient_cannot_use_admin_cancel(self):
+        self.client.force_login(self.patient)
+
+        response = self.client.post(
+            reverse('admin_cancel_booking', args=[self.booking.pk]),
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, 'confirmed')
+
+    def test_get_request_does_not_cancel_booking(self):
+        self.client.force_login(self.staff)
+
+        response = self.client.get(
+            reverse('admin_cancel_booking', args=[self.booking.pk]),
+        )
+
+        self.assertEqual(response.status_code, 405)
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, 'confirmed')
+
+    def test_staff_cannot_cancel_past_booking(self):
+        self.appointment.date = timezone.localdate() - timedelta(days=1)
+        self.appointment.save(update_fields=['date'])
+        self.client.force_login(self.staff)
+
+        response = self.client.post(
+            reverse('admin_cancel_booking', args=[self.booking.pk]),
+        )
+
+        self.assertRedirects(response, reverse('manage_bookings'))
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, 'confirmed')
+
