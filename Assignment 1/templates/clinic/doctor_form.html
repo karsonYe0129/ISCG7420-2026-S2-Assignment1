@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | Piki Ora Medical Center</title>
+</head>
+<body>
+  <main>
+    <h1>Add Doctor</h1>
+
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Save Doctor</button>
+    </form>
+
+    <p><a href="{% url 'manage_doctors' %}">Back to Doctors</a></p>
+  </main>
+</body>
+</html>

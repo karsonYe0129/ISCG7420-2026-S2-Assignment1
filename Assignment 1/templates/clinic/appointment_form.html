@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }} | Piki Ora Medical Center</title>
+</head>
+<body>
+<main>
+    <h1>{{ page_title }}</h1>
+    <p>All times are in Auckland local time.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save slot</button>
+    </form>
+
+    <p>
+        <a href="{% url 'manage_appointments' %}">Back to consultation slots</a>
+    </p>
+</main>
+</body>
+</html>

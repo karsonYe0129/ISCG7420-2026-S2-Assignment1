@@ -13,6 +13,12 @@
         <a href="{% url 'my_bookings' %}">My bookings</a>
     </p>
 
+    {% if user.is_staff %}
+    <p>
+        <a href="{% url 'dashboard' %}">Admin dashboard</a>
+    </p>
+    {% endif %}
+
     <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}
         <button type="submit">Log out</button>

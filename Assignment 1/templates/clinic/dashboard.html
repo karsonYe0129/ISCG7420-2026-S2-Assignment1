@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Piki Ora Medical Center</title>
+</head>
+<body>
+<main>
+    <h1>Admin Dashboard</h1>
+    <p>Signed in as {{ user.username }}</p>
+
+    <h2>Overview</h2>
+    <ul>
+        <li>Total doctors: {{ doctor_count }}</li>
+        <li>Total consultation slots: {{ appointment_count }}</li>
+        <li>Confirmed Bookings: {{ confirmed_booking_count }}</li>
+        <li>Patient accounts: {{ patient_count }}</li>
+    </ul>
+
+    <h2>Management</h2>
+    <p><a href="{% url 'manage_doctors' %}">Manage Doctors</a></p>
+
+    <p>
+        <a href="{% url 'manage_appointments' %}">Manage consultation slots</a>
+    </p>
+
+    <p><a href="{% url 'manage_bookings' %}">Manage bookings</a></p>
+
+    <p><a href="{% url 'manage_patients' %}">Manage patients</a></p>
+
+    <p><a href="{% url 'home' %}">Back to home</a></p>
+
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Logout</button>
+    </form>
+
+</main>
+</body>
+</html>

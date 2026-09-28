@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage consultations slots | Piki Ora Medical Center</title>
+</head>
+<body>
+<main>
+    <h1>Manage consultations slots</h1>
+    <p>All times are in New Zealand local Time</p>
+
+    {% for message in messages %}
+    <p role="status">{{ message }}</p>
+    {% endfor %}
+
+    <p>
+        <a href="{% url 'appointment_create' %}">Add consultation slot</a>
+    </p>
+
+    {% for appointment in appointments %}
+    <article>
+        <h2>{{ appointment.doctor.name }}</h2>
+
+        <p>
+            {{ appointment.date|date:"Y-m-d" }}
+            {{ appointment.start_time|time:"H:i" }}
+            -
+            {{ appointment.end_time|time:"H:i" }}
+        </p>
+
+        <p>
+            Slot status:
+            {% if appointment.is_active %}
+            Active
+            {% else %}
+            Inactive
+            {% endif %}
+        </p>
+
+        <p>
+            <a href="{% url 'appointment_edit' appointment.id %}">
+                Edit slot
+            </a>
+        </p>
+    </article>
+    {% empty %}
+    <p>No consultation slots have been added yet.</p>
+    {% endfor %}
+
+    <p>
+        <a href="{% url 'dashboard' %}">back to dashboard</a>
+    </p>
+
+</main>
+</body>
+</html>
