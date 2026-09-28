@@ -1,44 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Doctors | Piki Ora Medical Center</title>
-</head>
-<body>
-<main>
-    <h1>Manage Doctors</h1>
+{% extends "clinic/base.html" %}
 
-    {% for message in messages %}
-    <p role="status">{{ message }}</p>
-    {% endfor %}
+{% block title %}Manage doctors | Piki Ora Medical Center{% endblock %}
 
-    <p><a href="{% url 'doctor_create' %}">Add Doctor</a></p>
+{% block content %}
+<h1>Manage doctors</h1>
+<p class="muted">Manage doctor profiles and availability status.</p>
 
+<p>
+    <a href="{% url 'doctor_create' %}">Add doctor</a>
+</p>
+
+<div class="card-grid">
     {% for doctor in doctors %}
-    <p><a href="{% url 'doctor_edit' doctor.id %}">Edit doctor</a></p>
-    <article>
-        <h2>{{ doctor.name }}</h2>
-        <p>Sepeciality: {{ doctor.speciality }}</p>
+        <article class="card management-card">
+            <h2>{{ doctor.name }}</h2>
 
-        {% if doctor.bio %}
-        <p>Bio: {{ doctor.bio }}</p>
-        {% endif %}
+            <p>Speciality: {{ doctor.speciality }}</p>
 
-        <p>
-            Status:
-            {% if doctor.is_active %}
-            Active
-            {% else %}
-            Inactive
+            {% if doctor.bio %}
+                <p>{{ doctor.bio }}</p>
             {% endif %}
-        </p>
-    </article>
-    {% empty %}
-    <p>No doctors have been added yet.</p>
-    {% endfor %}
 
-    <p><a href="{% url 'dashboard' %}">Back to Dashboard</a></p>
-</main>
-</body>
-</html>
+            <p>
+                Status:
+                <strong>
+                    {% if doctor.is_active %}
+                        Active
+                    {% else %}
+                        Inactive
+                    {% endif %}
+                </strong>
+            </p>
+
+            <a href="{% url 'doctor_edit' doctor.id %}">
+                Edit doctor
+            </a>
+        </article>
+    {% empty %}
+        <p>No doctors have been added yet.</p>
+    {% endfor %}
+</div>
+
+<p>
+    <a href="{% url 'dashboard' %}">Back to dashboard</a>
+</p>
+{% endblock %}

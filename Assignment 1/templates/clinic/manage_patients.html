@@ -1,52 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage patients | Piki Ora Medical Center</title>
-</head>
-<body>
-<main>
-    <h1>Manage patients</h1>
+{% extends "clinic/base.html" %}
 
-    {% for message in messages %}
-    <p>{{ message }}</p>
-    {% endfor %}
+{% block title %}Manage patients | Piki Ora Medical Center{% endblock %}
 
+{% block content %}
+<h1>Manage patients</h1>
+<p class="muted">View patient accounts and manage account access.</p>
+
+<div class="card-grid">
     {% for patient in patients %}
-    <article>
-        <h2>{{ patient.username }}</h2>
-        <p>Email: {{ patient.email|default:"Not provided" }}</p>
-        <p>
-            Account status:
-            {% if patient.is_active %}
-            Active
-            {% else %}
-            Inactive
-            {% endif %}
-        </p>
+        <article class="card">
+            <h2>{{ patient.username }}</h2>
 
-        <form method="post"
-              action="{% url 'patient_set_status' patient.id %}">
-            {% csrf_token %}
+            <p>Email: {{ patient.email|default:"Not provided" }}</p>
 
-            {% if patient.is_active %}
-            <button type="submit" name="action" value="deactivate">
-                Deactivate account
-            </button>
-            {% else %}
-            <button type="submit" name="action" value="activate">
-                Activate account
-            </button>
-            {% endif %}
-        </form>
+            <p>
+                Account status:
+                <strong>
+                    {% if patient.is_active %}
+                        Active
+                    {% else %}
+                        Inactive
+                    {% endif %}
+                </strong>
+            </p>
 
-    </article>
+            <form method="post"
+                  action="{% url 'patient_set_status' patient.id %}">
+                {% csrf_token %}
+
+                {% if patient.is_active %}
+                    <button type="submit"
+                            class="button-danger"
+                            name="action"
+                            value="deactivate">
+                        Deactivate account
+                    </button>
+                {% else %}
+                    <button type="submit"
+                            name="action"
+                            value="activate">
+                        Activate account
+                    </button>
+                {% endif %}
+            </form>
+        </article>
     {% empty %}
-    <p>No patient accounts found.</p>
+        <p>No patient accounts found.</p>
     {% endfor %}
+</div>
 
-    <p><a href="{% url 'dashboard' %}">Back to dashboard</a></p>
-</main>
-</body>
-</html>
+<p>
+    <a href="{% url 'dashboard' %}">Back to dashboard</a>
+</p>
+{% endblock %}

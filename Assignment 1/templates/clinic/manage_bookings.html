@@ -1,48 +1,49 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage bookings | Piki Ora Medical Center</title>
-</head>
-<body>
-<main>
-    <h1>Manage bookings</h1>
-    <p>All times are in Auckland local time.</p>
+{% extends "clinic/base.html" %}
 
-    {% for message in messages %}
-    <p role="status">{{ message }}</p>
-    {% endfor %}
+{% block title %}Manage bookings | Piki Ora Medical Center{% endblock %}
 
+{% block content %}
+<h1>Manage bookings</h1>
+<p class="muted">All times are in Auckland local time.</p>
+
+<div class="booking-list">
     {% for booking in bookings %}
-    <article>
-        <h2>Booking #{{ booking.id }}</h2>
-        <p>Patient: {{ booking.patient.username }}</p>
-        <p>Doctor: {{ booking.appointment.doctor.name }}</p>
+        <article class="card booking-card">
+            <h2>Booking #{{ booking.id }}</h2>
 
-        <p>
-            {{ booking.appointment.date|date:"Y-m-d" }}
-            {{ booking.appointment.start_time|time:"H:i" }}
-            -
-            {{ booking.appointment.end_time|time:"H:i" }}
-        </p>
+            <p>Patient: {{ booking.patient.username }}</p>
+            <p>Doctor: {{ booking.appointment.doctor.name }}</p>
 
-        <p>Status: {{ booking.get_status_display }}</p>
+            <p>
+                {{ booking.appointment.date|date:"Y-m-d" }}<br>
+                {{ booking.appointment.start_time|time:"H:i" }}
+                –
+                {{ booking.appointment.end_time|time:"H:i" }}
+            </p>
 
-        {% if booking.can_cancel %}
-        <form method="post"
-              action="{% url 'admin_cancel_booking' booking.id %}">
-            {% csrf_token %}
-            <button type="submit">Cancel booking</button>
-        </form>
-        {% endif %}
+            <p>
+                Status:
+                <strong class="booking-status {{ booking.status }}">
+                    {{ booking.get_status_display }}
+                </strong>
+            </p>
 
-    </article>
+            {% if booking.can_cancel %}
+                <form method="post"
+                      action="{% url 'admin_cancel_booking' booking.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="button-danger">
+                        Cancel booking
+                    </button>
+                </form>
+            {% endif %}
+        </article>
     {% empty %}
-    <p>No bookings have been made yet.</p>
+        <p>No bookings have been made yet.</p>
     {% endfor %}
+</div>
 
-    <p><a href="{% url 'dashboard' %}">Back to dashboard</a></p>
-</main>
-</body>
-</html>
+<p>
+    <a href="{% url 'dashboard' %}">Back to dashboard</a>
+</p>
+{% endblock %}

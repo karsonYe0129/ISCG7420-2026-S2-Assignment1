@@ -1,57 +1,50 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage consultations slots | Piki Ora Medical Center</title>
-</head>
-<body>
-<main>
-    <h1>Manage consultations slots</h1>
-    <p>All times are in New Zealand local Time</p>
+{% extends "clinic/base.html" %}
 
-    {% for message in messages %}
-    <p role="status">{{ message }}</p>
-    {% endfor %}
+{% block title %}Manage consultation slots | Piki Ora Medical Center{% endblock %}
 
-    <p>
-        <a href="{% url 'appointment_create' %}">Add consultation slot</a>
-    </p>
+{% block content %}
+<h1>Manage consultation slots</h1>
+<p class="muted">All times are in Auckland local time.</p>
 
+<p>
+    <a href="{% url 'appointment_create' %}">
+        Add consultation slot
+    </a>
+</p>
+
+<div class="card-grid">
     {% for appointment in appointments %}
-    <article>
-        <h2>{{ appointment.doctor.name }}</h2>
+        <article class="card management-card">
+            <h2>{{ appointment.doctor.name }}</h2>
 
-        <p>
-            {{ appointment.date|date:"Y-m-d" }}
-            {{ appointment.start_time|time:"H:i" }}
-            -
-            {{ appointment.end_time|time:"H:i" }}
-        </p>
+            <p>
+                {{ appointment.date|date:"Y-m-d" }}<br>
+                {{ appointment.start_time|time:"H:i" }}
+                –
+                {{ appointment.end_time|time:"H:i" }}
+            </p>
 
-        <p>
-            Slot status:
-            {% if appointment.is_active %}
-            Active
-            {% else %}
-            Inactive
-            {% endif %}
-        </p>
+            <p>
+                Slot status:
+                <strong>
+                    {% if appointment.is_active %}
+                        Active
+                    {% else %}
+                        Inactive
+                    {% endif %}
+                </strong>
+            </p>
 
-        <p>
             <a href="{% url 'appointment_edit' appointment.id %}">
                 Edit slot
             </a>
-        </p>
-    </article>
+        </article>
     {% empty %}
-    <p>No consultation slots have been added yet.</p>
+        <p>No consultation slots have been added yet.</p>
     {% endfor %}
+</div>
 
-    <p>
-        <a href="{% url 'dashboard' %}">back to dashboard</a>
-    </p>
-
-</main>
-</body>
-</html>
+<p>
+    <a href="{% url 'dashboard' %}">Back to dashboard</a>
+</p>
+{% endblock %}

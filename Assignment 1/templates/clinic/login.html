@@ -1,29 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Log in | Piki Ora Medical Center</title>
-</head>
-<body>
-<main>
-    <h1>Log in</h1>
+{% extends 'clinic/base.html' %}
 
-    <form method="post" action="{% url 'login' %}">
-        {% csrf_token %}
-        {{ form.as_p }}
+{% block title %}Log in | Piki Ora Medical Center{% endblock %}
 
-        <input type="hidden" name="next" value="{{ next }}">
-        <button type="submit">Log in</button>
-    </form>
+{% block content %}
+    <section class="card form-panel">
+        <h1>Log in</h1>
+        <p class="muted">Sign in to book and manage your appointments.</p>
 
-    <p>
-        No account?
-        <a href="{% url 'register' %}">Register</a>
-    </p>
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            {{ form.as_p }}
 
-    <p><a href="{% url 'home' %}">Back to home</a></p>
+            <input type="hidden" name="next" value="{{ next }}">
+            <button type="submit">Log in</button>
+        </form>
 
-</main>
-</body>
-</html>
+        <p>
+            No account?
+            <a href="{% url 'register' %}">Create an account</a>
+        </p>
+    </section>
+{% endblock %}

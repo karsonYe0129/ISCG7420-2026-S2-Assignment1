@@ -1,21 +1,26 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ page_title }} | Piki Ora Medical Center</title>
-</head>
-<body>
-  <main>
-    <h1>Add Doctor</h1>
+{% extends "clinic/base.html" %}
+
+{% block title %}{{ page_title }} | Piki Ora Medical Center{% endblock %}
+
+{% block content %}
+<section class="card form-panel">
+    <h1>{{ page_title }}</h1>
+
+    <p class="muted">
+        Enter the doctor's profile and availability status.
+    </p>
 
     <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit">Save Doctor</button>
+        {% csrf_token %}
+        {{ form.as_p }}
+
+        <button type="submit">Save doctor</button>
     </form>
 
-    <p><a href="{% url 'manage_doctors' %}">Back to Doctors</a></p>
-  </main>
-</body>
-</html>
+    <p>
+        <a href="{% url 'manage_doctors' %}">
+            Back to doctors
+        </a>
+    </p>
+</section>
+{% endblock %}

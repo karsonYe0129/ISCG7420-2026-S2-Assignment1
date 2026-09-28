@@ -1,21 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register | Piki Ora Medical Center</title>
-</head>
-<body>
-    <main>
+{% extends 'clinic/base.html' %}
+
+{% block title %}Register | Piki Ora Medical Center{% endblock %}
+
+{% block content %}
+    <section class="card form-panel">
         <h1>Create a patient account</h1>
+        <p class="muted">Register to book and manage your appointments.</p>
 
         <form method="post" action="{% url 'register' %}">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit">Register</button>
+            <button type="submit">Create account</button>
         </form>
 
-        <p><a href="{% url 'home' %}">Back to home</a></p>
-    </main>
-</body>
-</html>
+        <p>
+            Already have an account?
+            <a href="{% url 'login' %}">Log in</a>
+        </p>
+    </section>
+{% endblock %}

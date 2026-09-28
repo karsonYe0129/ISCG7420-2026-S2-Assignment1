@@ -1,27 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta viewport="width=device-width, initial-scale=1.0">
-    <title>Reschedule Booking | Piki Ora Medical Center</title>
-</head>
-<body>
-<main>
-    <h1>Reschedule Booking</h1>
+{% extends 'clinic/base.html' %}
 
-    <p>Current Appointment: {{ booking.appointment }}</p>
-    <p>All times are in Auckland local time.</p>
+{% block title %}Reschedule booking | Piki Ora Medical Center{% endblock %}
 
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save new time</button>
-    </form>
+{% block content %}
+    <section class="card form-panel">
+        <h1>Reschedule booking</h1>
+        <p class="muted">All times are in Auckland local time.</p>
 
-    <p>
-        <a href="{% url 'my_bookings' %}">Back to my bookings</a>
-    </p>
+        <h2>Current appointment</h2>
+        <p>
+            <strong>{{ booking.appointment.doctor.name }}</strong>
+            <br>
+            {{ booking.appointment.date|date:"Y-m-d" }},
+            {{ booking.appointment.start_time|time:"H:i" }}
+            –
+            {{ booking.appointment.end_time|time:"H:i" }}
+        </p>
 
-</main>
-</body>
-</html>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save new time</button>
+        </form>
+
+        <p>
+            <a href="{% url 'my_bookings' %}">Back to my bookings</a>
+        </p>
+    </section>
+{% endblock %}
