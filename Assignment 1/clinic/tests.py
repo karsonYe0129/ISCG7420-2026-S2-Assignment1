@@ -240,3 +240,87 @@ class AdminCancelBookingTests(TestCase):
         self.booking.refresh_from_db()
         self.assertEqual(self.booking.status, 'confirmed')
 
+class PatientBookingPermissionTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        User = get_user_model()
+        cls.owner = User.objects.create_user(username='booking_owner')
+        cls.other_patient = User.objects.create_user(username='other_patient')
+
+        doctor = Doctor.objects.create(
+            name='Dr Permission Test',
+            speciality='General Practice',
+        )
+        tomorrow = timezone.localdate() + timedelta(days=1)
+
+        cls.original_slot = Appointment.objects.create(
+            doctor=doctor,
+            date=tomorrow,
+            start_time=time(9, 0),
+            end_time=time(9, 30),
+        )
+        cls.new_slot = Appointment.objects.create(
+            doctor=doctor,
+            date=tomorrow,
+            start_time=time(10, 0),
+            end_time=time(10, 30),
+        )
+        cls.booking = Booking.objects.create(
+            patient=cls.owner,
+            appointment=cls.original_slot,
+        )
+
+    def test_owner_can_cancel_booking(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse('cancel_booking', args=[self.booking.pk]),
+        )
+
+        self.assertRedirects(response, reverse('my_bookings'))
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, 'cancelled')
+
+    def test_other_patient_cannot_cancel_booking(self):
+        self.client.force_login(self.other_patient)
+
+        response = self.client.post(
+            reverse('cancel_booking', args=[self.booking.pk]),
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.status, 'confirmed')
+
+    def test_owner_can_reschedule_booking(self):
+        self.client.force_login(self.owner)
+
+        response = self.client.post(
+            reverse('reschedule_booking', args=[self.booking.pk]),
+            {'appointment': self.new_slot.pk},
+        )
+
+        self.assertRedirects(response, reverse('my_bookings'))
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.appointment_id, self.new_slot.pk)
+        self.assertEqual(self.booking.patient_id, self.owner.pk)
+        self.assertEqual(self.booking.status, 'confirmed')
+
+    def test_other_patient_cannot_reschedule_booking(self):
+        self.client.force_login(self.other_patient)
+        url = reverse('reschedule_booking', args=[self.booking.pk])
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+        response = self.client.post(
+            url,
+            {'appointment': self.new_slot.pk},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.booking.refresh_from_db()
+        self.assertEqual(self.booking.appointment_id, self.original_slot.pk)
+        self.assertEqual(self.booking.patient_id, self.owner.pk)
+        self.assertEqual(self.booking.status, 'confirmed')
+
